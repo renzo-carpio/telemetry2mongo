@@ -15,6 +15,8 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_srvs
   tf
+  sensor_msgs
+  std_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -112,7 +114,7 @@ find_package(Boost REQUIRED COMPONENTS system thread)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES telemetry2mongo
-  CATKIN_DEPENDS geometry_msgs nav_msgs roscpp rospy std_srvs tf
+  CATKIN_DEPENDS geometry_msgs nav_msgs roscpp rospy std_srvs tf sensor_msgs std_msgs
   DEPENDS Boost
 #  DEPENDS system_lib
 )
@@ -145,6 +147,7 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/telemetry2mongo_node.cpp)
 add_executable(telemetry2mongo src/telemetry2mongo.cpp)
+add_executable(telemetry2topic src/telemetry2topic.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -160,6 +163,10 @@ add_dependencies(telemetry2mongo
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
     ${catkin_EXPORTED_TARGETS}
 )
+add_dependencies(telemetry2topic
+    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+    ${catkin_EXPORTED_TARGETS}
+)
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
@@ -170,6 +177,11 @@ target_link_libraries(telemetry2mongo
   ${libmongocxx_LIBRARIES}
   ${catkin_LIBRARIES}
 )
+target_link_libraries(telemetry2topic
+  ${libmongocxx_LIBRARIES}
+  ${catkin_LIBRARIES}
+)
+
 
 #############
 ## Install ##

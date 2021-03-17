@@ -1,0 +1,6 @@
+#!/bin/bash
+
+source ~/.bashrc
+
+
+rostopic pub /campaign std_msgs/String "data: 'prova_id'" -r 1

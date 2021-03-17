@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<launch>
+
+    <node name="pub_odom" pkg="telemetry2mongo" type="gen_odom.py"/>
+    <node name="pub_camp" pkg="telemetry2mongo" type="pub_camp"/>
+    <node name="pub_fix" pkg="telemetry2mongo" type="pub_fix"/>
+
+    <node name="telemetry2topic" pkg="telemetry2mongo" type="telemetry2topic" output="screen">
+        <param name="frequency" value="1" />
+        <param name="odom_topic" value="/ekf_slam_node/slam_odom" />
+        <param name="gps_topic" value="/ekf_slam_node/slam_odom_fix" />
+        <param name="camp_topic" value="/campaign" />
+        <param name="payload_topic" value="/payload" />
+        <param name="activation_service" value="/telemetry2topic/active" />
+        <param name="platform" value="UGV" />
+        <param name="threshold_time" value="1.5" />
+    </node>
+
+</launch>

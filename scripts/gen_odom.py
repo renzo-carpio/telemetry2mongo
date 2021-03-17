@@ -29,7 +29,7 @@ def gen_odom():
 
     odom=Odometry()
 
-    pub = rospy.Publisher('/ekf_localization_slam_node/slam_odom_magnetic', Odometry, queue_size=1)
+    pub = rospy.Publisher('/ekf_slam_node/slam_odom', Odometry, queue_size=1)
     
     #main loop
     rate = rospy.Rate(5)
