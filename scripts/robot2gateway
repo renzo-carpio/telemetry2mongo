@@ -1,0 +1,29 @@
+#!/bin/bash
+
+source ~/.bashrc
+#source /opt/ros/$ROS_DISTRO/setup.bash
+source $ROS_WORKSPACE/devel/setup.bash
+roscd telemetry2mongo
+cd scripts
+
+#update every 10 seconds
+while(true)
+do
+     > temp_ros_file.json
+
+    #get from marter1
+    export ROS_MASTER_URI=http://sherpa-hl-b-desktop:11311
+    echo $(rostopic echo /payload -n 1) >> temp_ros_file.json
+    sed -i 's/\\//g' temp_ros_file.json
+    sed -i 's/data: \"//g' temp_ros_file.json
+    sed -i 's/" ---//g' temp_ros_file.json
+
+    #send to master2
+    export ROS_MASTER_URI=http://gateway:11311
+    rostopic pub /payload std_msgs/String "data: '$(cat temp_ros_file.json)'" -1
+    
+    sleep 5
+done
+
+    
+

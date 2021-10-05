@@ -45,12 +45,12 @@ geometry_msgs::Point get_rpy(nav_msgs::Odometry odom) {
 
 Telemetry2topic::Telemetry2topic(const ros::NodeHandle& n,
         const double frequency, const std::string odom_topic, const std::string gps_topic,
-        const std::string camp_topic, const std::string payload_topic, const std::string activation_service_name,
+        const std::string mission_topic, const std::string payload_topic, const std::string activation_service_name,
         const std::string platform, const double threshold_time)
         : m_activationService()
         , m_odom_sub()
         , m_gps_sub()
-        , m_camp_sub()
+        , m_mission_sub()
         , m_payload_pub()
         , m_platform(platform)
         , m_watchdog1(ros::Time::now().toSec())
@@ -73,7 +73,7 @@ Telemetry2topic::Telemetry2topic(const ros::NodeHandle& n,
     //subscribes
     m_odom_sub = nh.subscribe(odom_topic, 10, &Telemetry2topic::updateOdom, this);
     m_gps_sub = nh.subscribe(gps_topic, 10, &Telemetry2topic::updateGps, this);
-    m_camp_sub = nh.subscribe(camp_topic, 10, &Telemetry2topic::updateCamp, this);
+    m_mission_sub = nh.subscribe(mission_topic, 10, &Telemetry2topic::updateMission, this);
 
     //publisher
     m_payload_pub = nh.advertise<std_msgs::String>(payload_topic, 1);
@@ -130,9 +130,10 @@ void Telemetry2topic::iteration(const ros::TimerEvent& e) {
         // Create a document
 	    auto builder = bsoncxx::builder::stream::document{};
 	    auto doc_value_ = builder
-            << "_id" << telemetry_id
-            << "created" << m_time +".0"
-            << "id_campaign" << m_camp.data
+            << "id" << telemetry_id
+            << "created" << m_time // +".0"
+            << "id_mission_part" << m_mission.data
+            << "status" << "in_progress" //creare callback per inviare "executed"
             << "latitude" << m_gps.latitude
             << "longitude" << m_gps.longitude
             << "altitude" << m_gps.altitude
@@ -146,7 +147,7 @@ void Telemetry2topic::iteration(const ros::TimerEvent& e) {
             << bsoncxx::builder::stream::finalize;
 
 	    bsoncxx::document::view view = doc_value.view();
-	    bsoncxx::document::element element = view["_id"];
+	    bsoncxx::document::element element = view["id"];
 	    if(element.type() != bsoncxx::type::k_utf8) {
 	      // Error
             ROS_WARN("Telemetry2topic: element type wrong");
@@ -187,10 +188,10 @@ void Telemetry2topic::updateGps(const sensor_msgs::NavSatFix::ConstPtr& msg) {
     m_watchdog2 = ros::Time::now().toSec();
 }
 
-// Update Campaign
-void Telemetry2topic::updateCamp(const std_msgs::String::ConstPtr& msg) {
+// Update Mission
+void Telemetry2topic::updateMission(const std_msgs::String::ConstPtr& msg) {
         
-    m_camp = *msg;  
+    m_mission = *msg; 
 
     if(!m_initialized3){
         m_initialized3=true;
@@ -235,10 +236,10 @@ int main(int argc, char **argv)
     nh.param<std::string>("odom_topic", odom_topic, "/ekf_slam_node/slam_odom");
 
     std::string gps_topic;
-    nh.param<std::string>("gps_topic", gps_topic, "/ekf_slam_node/slam_odom_fix");
+    nh.param<std::string>("gps_topic", gps_topic, "/ekf_slam_node/slam_fix");
 
-    std::string camp_topic;
-    nh.param<std::string>("camp_topic", camp_topic, "/campaign");
+    std::string mission_topic;
+    nh.param<std::string>("mission_topic", mission_topic, "/mission");
 
     std::string activation_service_name;
     nh.param<std::string>("activation_service", activation_service_name, "/telemetry2topic/active");
@@ -255,7 +256,7 @@ int main(int argc, char **argv)
 
     Telemetry2topic telemetry2topic(nh,
         frequency, odom_topic, gps_topic,
-        camp_topic, payload_topic, activation_service_name,
+        mission_topic, payload_topic, activation_service_name,
         platform, threshold_time);
     
     telemetry2topic.run(frequency);

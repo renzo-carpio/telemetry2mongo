@@ -49,7 +49,7 @@ public:
        
     Telemetry2topic(const ros::NodeHandle& n,
         const double frequency, const std::string odom_topic, const std::string gps_topic,
-        const std::string camp_topic, const std::string payload_topic, const std::string activation_service_name,
+        const std::string mission_topic, const std::string payload_topic, const std::string activation_service_name,
         const std::string platform, const double threshold_time);
 
     void run(double frequency);
@@ -64,8 +64,8 @@ private:
     // Update GPS
     void updateGps(const sensor_msgs::NavSatFix::ConstPtr& msg);
 
-    // Update Campaign
-    void updateCamp(const std_msgs::String::ConstPtr& msg);
+    // Update Mission
+    void updateMission(const std_msgs::String::ConstPtr& msg);
 
     // Activation service
     bool activation_service(
@@ -78,11 +78,11 @@ private:
     ros::ServiceServer m_activationService;
     nav_msgs::Odometry m_odom;
     sensor_msgs::NavSatFix m_gps;
-    std_msgs::String m_camp;
+    std_msgs::String m_mission;
     std_msgs::String m_payload;
     ros::Subscriber m_odom_sub;
     ros::Subscriber m_gps_sub;
-    ros::Subscriber m_camp_sub;
+    ros::Subscriber m_mission_sub;
     ros::Publisher m_payload_pub;
     std::string m_time;
     std::string m_platform;
